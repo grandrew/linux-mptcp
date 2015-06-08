@@ -321,7 +321,7 @@ struct mptcp_cb {
 	__u32	mptcp_loc_token;
 	__u32	mptcp_rem_token;
 
-#define MPTCP_PM_SIZE 608
+#define MPTCP_PM_SIZE 8192
 	u8 mptcp_pm[MPTCP_PM_SIZE] __aligned(8);
 	struct mptcp_pm_ops *pm_ops;
 
