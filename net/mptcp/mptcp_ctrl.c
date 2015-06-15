@@ -1190,12 +1190,15 @@ int mptcp_add_sock(struct sock *meta_sk, struct sock *sk, u8 loc_id, u8 rem_id,
 	struct tcp_sock *tp	= tcp_sk(sk);
 
 	tp->mptcp = kmem_cache_zalloc(mptcp_sock_cache, flags);
-	if (!tp->mptcp)
+	if (!tp->mptcp)	{
+		mptcp_debug("%s: assert! kmem_cache_zalloc cannot allocate memory\n", __func__);
 		return -ENOMEM;
+	}
 
 	tp->mptcp->path_index = mptcp_set_new_pathindex(mpcb);
 	/* No more space for more subflows? */
 	if (!tp->mptcp->path_index) {
+		mptcp_debug("%s: assert! No more space for more subflows?\n", __func__);
 		kmem_cache_free(mptcp_sock_cache, tp->mptcp);
 		return -EPERM;
 	}
@@ -1995,17 +1998,20 @@ struct sock *mptcp_check_req_child(struct sock *meta_sk, struct sock *child,
 
 	child_tp->inside_tk_table = 0;
 
-	if (!mopt->join_ack)
+	if (!mopt->join_ack) {
+		mptcp_debug("%s: assert! mopt->join_ack fail\n", __func__);
 		goto teardown;
-
+	}
 	mptcp_hmac_sha1((u8 *)&mpcb->mptcp_rem_key,
 			(u8 *)&mpcb->mptcp_loc_key,
 			(u8 *)&mtreq->mptcp_rem_nonce,
 			(u8 *)&mtreq->mptcp_loc_nonce,
 			(u32 *)hash_mac_check);
 
-	if (memcmp(hash_mac_check, (char *)&mopt->mptcp_recv_mac, 20))
+	if (memcmp(hash_mac_check, (char *)&mopt->mptcp_recv_mac, 20)) {
+		mptcp_debug("%s: assert! memcpy hash_mac_ckeck fail\n", __func__);
 		goto teardown;
+	}
 
 	/* Point it to the same struct socket and wq as the meta_sk */
 	sk_set_socket(child, meta_sk->sk_socket);
