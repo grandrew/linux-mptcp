@@ -414,6 +414,8 @@ static void create_subflow_worker(struct work_struct *work)
 	int iter = 0, retry = 0; //retry???
 	int i;
 
+	mptcp_debug("%s sizeof(struct fullmesh_priv) = %d MPTCP_PM_SIZE = %d \n", __func__, sizeof(struct fullmesh_priv), MPTCP_PM_SIZE);
+
 	/* We need a local (stable) copy of the address-list. Really, it is not
 	 * such a big deal, if the address-list is not 100% up-to-date.
 	 */
