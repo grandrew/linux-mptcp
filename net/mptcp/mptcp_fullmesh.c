@@ -411,7 +411,8 @@ static void create_subflow_worker(struct work_struct *work)
 	struct sock *meta_sk = mpcb->meta_sk;
 	struct mptcp_loc_addr *mptcp_local;
 	const struct mptcp_fm_ns *fm_ns = fm_get_ns(sock_net(meta_sk));
-	int iter = 0, retry = 0; //retry???
+	int iter = 0;
+	u64 retry = 0;
 	int i;
 
 	mptcp_debug("%s sizeof(struct fullmesh_priv) = %d MPTCP_PM_SIZE = %d \n", __func__, sizeof(struct fullmesh_priv), MPTCP_PM_SIZE);
