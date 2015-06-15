@@ -473,7 +473,7 @@ next_subflow:
 #if IS_ENABLED(CONFIG_IPV6)
 	mptcp_for_each_bit_set(fmp->rem6_bits, i) {
 		struct fullmesh_rem6 *rem;
-		u8 remaining_bits;
+		u64 remaining_bits;
 
 		rem = &fmp->remaddr6[i];
 		remaining_bits = ~(rem->bitfield) & mptcp_local->loc6_bits;
