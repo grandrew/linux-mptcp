@@ -15,10 +15,6 @@ static inline int ffs(int x)
 
 	if (!x)
 		return 0;
-	if (!(x & 0xffffffff)) {
-		x >>= 32;
-		r += 32;
-	}
 	if (!(x & 0xffff)) {
 		x >>= 16;
 		r += 16;
