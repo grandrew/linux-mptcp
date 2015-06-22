@@ -77,6 +77,15 @@ struct fullmesh_priv {
 	u16 rem6_bits;
 };
 
+char* full_mesh_get_16_bitfield(u16 bitfield, char *bit_string) {
+	int i;
+	for (i = 0; i < 16; i++) {
+		bit_string[i] = bitfield & (1 << i) ? 0x31 : 0x30;
+	}
+	return bit_string;
+}
+
+
 struct mptcp_fm_ns {
 	struct mptcp_loc_addr __rcu *local;
 	spinlock_t local_lock; /* Protecting the above pointer */
@@ -414,6 +423,7 @@ static void create_subflow_worker(struct work_struct *work)
 	int iter = 0;
 	u16 retry = 0;
 	int i;
+	char bit_string[16];
 
 	mptcp_debug("%s sizeof(struct fullmesh_priv) <= %zu MPTCP_PM_SIZE = %d MPTCP_MAX_ADDR = %d\n", __func__, sizeof(struct fullmesh_priv), MPTCP_PM_SIZE, MPTCP_MAX_ADDR);
 
@@ -446,7 +456,7 @@ next_subflow:
 	if (mpcb->master_sk &&
 	    !tcp_sk(mpcb->master_sk)->mptcp->fully_established)
 		goto exit;
-
+	mptcp_debug("%s fmp->rem4_bits is %s", __func__, full_mesh_get_16_bitfield(fmp->rem4_bits, bit_string));
 	mptcp_for_each_bit_set(fmp->rem4_bits, i) {
 		struct fullmesh_rem4 *rem;
 		u16 remaining_bits;
@@ -458,6 +468,7 @@ next_subflow:
 		if (remaining_bits) {
 			int i = mptcp_find_free_index(~remaining_bits);
 			struct mptcp_rem4 rem4;
+			mptcp_debug("%s remaining_bits is %s index is %d", __func__, full_mesh_get_16_bitfield(remaining_bits, bit_string), i);
 
 			rem->bitfield |= (1 << i);
 
