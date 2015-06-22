@@ -415,7 +415,7 @@ static void create_subflow_worker(struct work_struct *work)
 	u16 retry = 0;
 	int i;
 
-	mptcp_debug("%s sizeof(struct fullmesh_priv) = %d MPTCP_PM_SIZE = %d \n", __func__, sizeof(struct fullmesh_priv), MPTCP_PM_SIZE);
+	mptcp_debug("%s sizeof(struct fullmesh_priv) <= %zu MPTCP_PM_SIZE = %d MPTCP_MAX_ADDR = %d\n", __func__, sizeof(struct fullmesh_priv), MPTCP_PM_SIZE, MPTCP_MAX_ADDR);
 
 	/* We need a local (stable) copy of the address-list. Really, it is not
 	 * such a big deal, if the address-list is not 100% up-to-date.
@@ -621,6 +621,7 @@ next_event:
 
 	if (event->code == MPTCP_EVENT_DEL) {
 		id = mptcp_find_address(mptcp_local, event->family, &event->addr);
+		mptcp_debug("%s: MPTCP_EVENT_DEL id %d\n", __func__, id);
 
 		/* Not in the list - so we don't care */
 		if (id < 0) {
@@ -653,7 +654,7 @@ next_event:
 			if (event->family == AF_INET6)
 				i = __mptcp_find_free_index(mptcp_local->loc6_bits,
 							    mptcp_local->next_v6_index);
-
+			mptcp_debug("%s: add MPTCP_EVENT_ADD addr num %d\n", __func__, i);
 			if (i < 0) {
 				mptcp_debug("%s no more space\n", __func__);
 				goto duno;
@@ -765,7 +766,7 @@ duno:
 				sk = mptcp_select_ack_sock(meta_sk);
 				if (sk)
 					tcp_send_ack(sk);
-
+				mptcp_debug("%s: MPTCP_EVENT_ADD calling full_mesh_create_subflows fmp->add_addr %hhu\n", __func__, fmp->add_addr);
 				full_mesh_create_subflows(meta_sk);
 			}
 
@@ -773,7 +774,7 @@ duno:
 				struct sock *sk, *tmpsk;
 				struct mptcp_loc_addr *mptcp_local;
 				bool found = false;
-
+				mptcp_debug("%s: MPTCP_EVENT_DEL in iterator id %d\n", __func__, id);
 				mptcp_local = rcu_dereference_bh(fm_ns->local);
 
 				/* In any case, we need to update our bitfields */
@@ -1150,6 +1151,7 @@ static void full_mesh_add_raddr(struct mptcp_cb *mpcb,
 				const union inet_addr *addr,
 				sa_family_t family, __be16 port, u8 id)
 {
+	mptcp_debug("%s: add_raddr port %hu id %hhu\n", __func__, port, id);
 	if (family == AF_INET)
 		mptcp_addv4_raddr(mpcb, &addr->in, port, id);
 	else
@@ -1461,7 +1463,15 @@ static void full_mesh_addr_signal(struct sock *sk, unsigned *size,
 	bool meta_v4 = meta_sk->sk_family == AF_INET;
 
 	mpcb->addr_signal = 0;
-
+	if (likely(!fmp->add_addr)) {
+		if (likely(!fmp->remove_addrs)) {
+			mptcp_debug("%s: unknow addr signal\n", __func__);
+		} else {
+			mptcp_debug("%s: remove_addr signal\n", __func__);
+		}
+	} else {
+		mptcp_debug("%s: add_addr signal\n", __func__);
+	}
 	if (likely(!fmp->add_addr))
 		goto remove_addr;
 
@@ -1540,6 +1550,7 @@ exit:
 
 static void full_mesh_rem_raddr(struct mptcp_cb *mpcb, u8 rem_id)
 {
+	mptcp_debug("%s: rem_raddr id %hhu \n", __func__, rem_id);
 	mptcp_v4_rem_raddress(mpcb, rem_id);
 	mptcp_v6_rem_raddress(mpcb, rem_id);
 }
