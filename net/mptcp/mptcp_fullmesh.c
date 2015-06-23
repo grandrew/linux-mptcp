@@ -79,9 +79,10 @@ struct fullmesh_priv {
 
 char* full_mesh_get_16_bitfield(u16 bitfield, char *bit_string) {
 	int i;
-	for (i = 0; i < 16; i++) {
+	for (i = 0; i < MPTCP_MAX_ADDR; i++) {
 		bit_string[i] = bitfield & (1 << i) ? 0x31 : 0x30;
 	}
+	bit_string[MPTCP_MAX_ADDR] = '\0';
 	return bit_string;
 }
 
@@ -423,7 +424,7 @@ static void create_subflow_worker(struct work_struct *work)
 	int iter = 0;
 	u16 retry = 0;
 	int i;
-	char bit_string[16];
+	char bit_string[MPTCP_MAX_ADDR + 1];
 
 	mptcp_debug("%s sizeof(struct fullmesh_priv) <= %zu MPTCP_PM_SIZE = %d MPTCP_MAX_ADDR = %d\n", __func__, sizeof(struct fullmesh_priv), MPTCP_PM_SIZE, MPTCP_MAX_ADDR);
 
