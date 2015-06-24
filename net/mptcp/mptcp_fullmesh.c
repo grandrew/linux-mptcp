@@ -458,13 +458,14 @@ next_subflow:
 	    !tcp_sk(mpcb->master_sk)->mptcp->fully_established)
 		goto exit;
 	mptcp_debug("%s fmp->rem4_bits is %s", __func__, full_mesh_get_16_bitfield(fmp->rem4_bits, bit_string));
+	mptcp_debug("%s mptcp_local->loc4_bits is %s", __func__, full_mesh_get_16_bitfield(mptcp_local->loc4_bits, bit_string));
 	mptcp_for_each_bit_set(fmp->rem4_bits, i) {
 		struct fullmesh_rem4 *rem;
 		u16 remaining_bits;
 
 		rem = &fmp->remaddr4[i];
 		remaining_bits = ~(rem->bitfield) & mptcp_local->loc4_bits;
-
+		mptcp_debug("%s rem->bitfield is %s index is %d", __func__, full_mesh_get_16_bitfield(rem->bitfield, bit_string), i);
 		/* Are there still combinations to handle? */
 		if (remaining_bits) {
 			int i = mptcp_find_free_index(~remaining_bits);
@@ -514,6 +515,7 @@ next_subflow:
 #endif
 
 	if (retry && !delayed_work_pending(&fmp->subflow_retry_work)) {
+		mptcp_debug("%s retry with %s ", __func__, full_mesh_get_16_bitfield(retry, bit_string));
 		sock_hold(meta_sk);
 		queue_delayed_work(mptcp_wq, &fmp->subflow_retry_work,
 				   msecs_to_jiffies(MPTCP_SUBFLOW_RETRY_DELAY));
