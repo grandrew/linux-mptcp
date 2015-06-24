@@ -363,6 +363,7 @@ next_subflow:
 		/* Do we need to retry establishing a subflow ? */
 		if (rem->retry_bitfield) {
 			int i = mptcp_find_free_index(~rem->retry_bitfield);
+			int ret_code;
 			struct mptcp_rem4 rem4;
 
 			rem->bitfield |= (1 << i);
@@ -372,7 +373,8 @@ next_subflow:
 			rem4.port = rem->port;
 			rem4.rem4_id = rem->rem4_id;
 
-			mptcp_init4_subsockets(meta_sk, &mptcp_local->locaddr4[i], &rem4);
+			ret_code = mptcp_init4_subsockets(meta_sk, &mptcp_local->locaddr4[i], &rem4);
+			mptcp_debug("%s func mptcp_init4_subsockets num %d ret code %d", __func__, i, ret_code);
 			goto next_subflow;
 		}
 	}
@@ -482,10 +484,10 @@ next_subflow:
 			ret_code = mptcp_init4_subsockets(meta_sk, &mptcp_local->locaddr4[i], &rem4);
 			/* If a route is not yet available then retry once */
 			if (ret_code == -ENETUNREACH) {
-				mptcp_debug("%s func mptcp_init4_subsockets ret code -ENETUNREACH", __func__);
+				mptcp_debug("%s func mptcp_init4_subsockets num %d ret code %d(-ENETUNREACH)", __func__, i, ret_code);
 				retry = rem->retry_bitfield |= (1 << i);
 			} else {
-				mptcp_debug("%s func mptcp_init4_subsockets ret code %d", __func__, ret_code);
+				mptcp_debug("%s func mptcp_init4_subsockets num %d ret code %d", __func__, i, ret_code);
 			}
 			goto next_subflow;
 		}
