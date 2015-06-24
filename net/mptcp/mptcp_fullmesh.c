@@ -462,6 +462,7 @@ next_subflow:
 	mptcp_for_each_bit_set(fmp->rem4_bits, i) {
 		struct fullmesh_rem4 *rem;
 		u16 remaining_bits;
+		int ret_code;
 
 		rem = &fmp->remaddr4[i];
 		remaining_bits = ~(rem->bitfield) & mptcp_local->loc4_bits;
@@ -478,10 +479,14 @@ next_subflow:
 			rem4.port = rem->port;
 			rem4.rem4_id = rem->rem4_id;
 
+			ret_code = mptcp_init4_subsockets(meta_sk, &mptcp_local->locaddr4[i], &rem4);
 			/* If a route is not yet available then retry once */
-			if (mptcp_init4_subsockets(meta_sk, &mptcp_local->locaddr4[i],
-						   &rem4) == -ENETUNREACH)
+			if (ret_code == -ENETUNREACH) {
+				mptcp_debug("%s func mptcp_init4_subsockets ret code -ENETUNREACH", __func__);
 				retry = rem->retry_bitfield |= (1 << i);
+			} else {
+				mptcp_debug("%s func mptcp_init4_subsockets ret code %d", __func__, ret_code);
+			}
 			goto next_subflow;
 		}
 	}
