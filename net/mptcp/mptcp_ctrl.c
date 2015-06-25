@@ -45,6 +45,7 @@
 
 #include <linux/cryptohash.h>
 #include <linux/kconfig.h>
+#include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/netpoll.h>
 #include <linux/list.h>
@@ -1289,6 +1290,7 @@ void mptcp_del_sock(struct sock *sk)
 	mptcp_debug("%s: Removing subsock tok %#x pi:%d state %d is_meta? %d\n",
 		    __func__, mpcb->mptcp_loc_token, tp->mptcp->path_index,
 		    sk->sk_state, is_meta_sk(sk));
+	dump_stack();
 
 	if (tp_prev == tp) {
 		mpcb->connection_list = tp->mptcp->next;
@@ -1483,7 +1485,7 @@ void mptcp_sub_close(struct sock *sk, unsigned long delay)
 			return;
 		sock_put(sk);
 	}
-
+	mptcp_debug("%s: delay %d\n", __func__, delay);
 	if (!delay) {
 		unsigned char old_state = sk->sk_state;
 
@@ -1528,7 +1530,7 @@ void mptcp_sub_close(struct sock *sk, unsigned long delay)
 			sk->sk_state = old_state;
 		}
 	}
-
+	dump_stack();
 	sock_hold(sk);
 	queue_delayed_work(mptcp_wq, work, delay);
 }
