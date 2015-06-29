@@ -262,6 +262,7 @@ failure:
 	ip_rt_put(rt);
 	sk->sk_route_caps = 0;
 	inet->inet_dport = 0;
+	printk("%s failure with %d ", __func__, err);
 	return err;
 }
 EXPORT_SYMBOL(tcp_v4_connect);

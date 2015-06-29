@@ -3188,6 +3188,8 @@ int tcp_connect(struct sock *sk)
 	/* Send off SYN; include data in Fast Open. */
 	err = tp->fastopen_req ? tcp_send_syn_data(sk, buff) :
 	      tcp_transmit_skb(sk, buff, 1, sk->sk_allocation);
+	if (err)
+		printk("%s failure with %d ", __func__, err);
 	if (err == -ECONNREFUSED)
 		return err;
 

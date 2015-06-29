@@ -1485,7 +1485,7 @@ void mptcp_sub_close(struct sock *sk, unsigned long delay)
 			return;
 		sock_put(sk);
 	}
-	mptcp_debug("%s: delay %d\n", __func__, delay);
+	mptcp_debug("%s: delay %lu\n", __func__, delay);
 	if (!delay) {
 		unsigned char old_state = sk->sk_state;
 
