@@ -476,6 +476,7 @@ next_subflow:
 			mptcp_debug("%s remaining_bits is %s index is %d", __func__, full_mesh_get_16_bitfield(remaining_bits, bit_string), i);
 
 			rem->bitfield |= (1 << i);
+			mptcp_debug("%s and now rem->bitfield is %s index is %d", __func__, full_mesh_get_16_bitfield(rem->bitfield, bit_string), i);
 
 			rem4.addr = rem->addr;
 			rem4.port = rem->port;
