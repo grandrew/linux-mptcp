@@ -1491,8 +1491,6 @@ static void full_mesh_addr_signal(struct sock *sk, unsigned *size,
 		} else {
 			mptcp_debug("%s: remove_addr signal\n", __func__);
 		}
-	} else {
-		mptcp_debug("%s: add_addr signal\n", __func__);
 	}
 	if (likely(!fmp->add_addr))
 		goto remove_addr;
@@ -1514,6 +1512,8 @@ static void full_mesh_addr_signal(struct sock *sk, unsigned *size,
 		opts->add_addr4.addr_id = mptcp_local->locaddr4[ind].loc4_id;
 		opts->add_addr4.addr = mptcp_local->locaddr4[ind].addr;
 		opts->add_addr_v4 = 1;
+
+		mptcp_debug("%s: add_addr signal src_addr:%pI4\n", __func__, &opts->add_addr4.addr);
 
 		if (skb) {
 			fmp->announced_addrs_v4 |= (1 << ind);
@@ -1537,6 +1537,8 @@ skip_ipv4:
 		opts->add_addr6.addr_id = mptcp_local->locaddr6[ind].loc6_id;
 		opts->add_addr6.addr = mptcp_local->locaddr6[ind].addr;
 		opts->add_addr_v6 = 1;
+
+		mptcp_debug("%s: add_addr signal src_addr:%pI6\n", __func__, &opts->add_addr6.addr);
 
 		if (skb) {
 			fmp->announced_addrs_v6 |= (1 << ind);
