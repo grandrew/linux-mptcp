@@ -63,6 +63,7 @@ struct fullmesh_priv {
 
 	struct delayed_work subflow_monitor_work;
 
+	int counter;
 	/* Remote addresses */
 	struct fullmesh_rem4 remaddr4[MPTCP_MAX_ADDR];
 	struct fullmesh_rem6 remaddr6[MPTCP_MAX_ADDR];
@@ -538,7 +539,11 @@ exit:
 }
 
 static void subflow_monitor_worker(struct work_struct *work) {
-	mptcp_debug("%s i am stumb ", __func__);
+	struct delayed_work *delayed_work = container_of(work, struct delayed_work, work);
+	struct fullmesh_priv *fmp = container_of(delayed_work, struct fullmesh_priv, subflow_monitor_work);
+	mptcp_debug("%s i am stumb %d", __func__, fmp->counter++);
+	queue_delayed_work(mptcp_wq, &fmp->subflow_monitor_work,  msecs_to_jiffies(10000));
+
 }
 
 static void announce_remove_addr(u8 addr_id, struct sock *meta_sk)
