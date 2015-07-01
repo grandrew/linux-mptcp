@@ -430,7 +430,6 @@ static void create_subflow_worker(struct work_struct *work)
 
 	mptcp_debug("%s sizeof(struct fullmesh_priv) <= %zu MPTCP_PM_SIZE = %d MPTCP_MAX_ADDR = %d\n", __func__, sizeof(struct fullmesh_priv), MPTCP_PM_SIZE, MPTCP_MAX_ADDR);
 
-	queue_delayed_work(mptcp_wq, &fmp->subflow_monitor_work,  msecs_to_jiffies(10000));
 
 	/* We need a local (stable) copy of the address-list. Really, it is not
 	 * such a big deal, if the address-list is not 100% up-to-date.
@@ -442,6 +441,8 @@ static void create_subflow_worker(struct work_struct *work)
 
 	if (!mptcp_local)
 		return;
+
+	queue_delayed_work(mptcp_wq, &fmp->subflow_monitor_work,  msecs_to_jiffies(10000));
 
 next_subflow:
 	if (iter) {
@@ -541,8 +542,14 @@ exit:
 static void subflow_monitor_worker(struct work_struct *work) {
 	struct delayed_work *delayed_work = container_of(work, struct delayed_work, work);
 	struct fullmesh_priv *fmp = container_of(delayed_work, struct fullmesh_priv, subflow_monitor_work);
+	struct mptcp_cb *mpcb = fmp->mpcb;
+	struct sock *meta_sk = mpcb->meta_sk;
+	if (sock_flag(meta_sk, SOCK_DEAD)) {
+		mptcp_debug("%s sock is dead buy", __func__);
+	} else {
+		queue_delayed_work(mptcp_wq, &fmp->subflow_monitor_work, msecs_to_jiffies(10000));
+	}
 	mptcp_debug("%s i am stumb %d", __func__, fmp->counter++);
-	queue_delayed_work(mptcp_wq, &fmp->subflow_monitor_work,  msecs_to_jiffies(10000));
 
 }
 
