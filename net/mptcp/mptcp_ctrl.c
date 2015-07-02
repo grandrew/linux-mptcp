@@ -1432,6 +1432,8 @@ void mptcp_sub_close_wq(struct work_struct *work)
 	struct sock *sk = (struct sock *)tp;
 	struct sock *meta_sk = mptcp_meta_sk(sk);
 
+	mptcp_debug("%s: closing socket rem_id %d loc_id %d\n", __func__,tp->mptcp->rem_id,tp->mptcp->loc_id);
+
 	mutex_lock(&tp->mpcb->mpcb_mutex);
 	lock_sock_nested(meta_sk, SINGLE_DEPTH_NESTING);
 

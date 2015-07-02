@@ -544,12 +544,28 @@ static void subflow_monitor_worker(struct work_struct *work) {
 	struct fullmesh_priv *fmp = container_of(delayed_work, struct fullmesh_priv, subflow_monitor_work);
 	struct mptcp_cb *mpcb = fmp->mpcb;
 	struct sock *meta_sk = mpcb->meta_sk;
+	const struct mptcp_fm_ns *fm_ns = fm_get_ns(sock_net(meta_sk));
+	char bit_string[MPTCP_MAX_ADDR + 1];
+	int i;
+
 	if (sock_flag(meta_sk, SOCK_DEAD)) {
 		mptcp_debug("%s sock is dead buy", __func__);
 		goto exit;
 	}
 
-	queue_delayed_work(mptcp_wq, &fmp->subflow_monitor_work, msecs_to_jiffies(10000));
+	mptcp_debug("%s rem4_bits is          %s", __func__,full_mesh_get_16_bitfield(fmp->rem4_bits, bit_string) );
+	mptcp_for_each_bit_set(fmp->rem4_bits, i) {
+		struct fullmesh_rem4 *rem;
+		u16 remaining_bits;
+
+		rem = &fmp->remaddr4[i];
+		remaining_bits = ~(rem->bitfield) & fm_ns->local->loc4_bits;
+		mptcp_debug("%s bitfield is       %s", __func__,full_mesh_get_16_bitfield(rem->bitfield, bit_string) );
+		mptcp_debug("%s loc4_bits is      %s", __func__,full_mesh_get_16_bitfield(fm_ns->local->loc4_bits, bit_string) );
+		mptcp_debug("%s remaining_bits is %s", __func__,full_mesh_get_16_bitfield(remaining_bits, bit_string) );
+
+	}
+	queue_delayed_work(mptcp_wq, &fmp->subflow_monitor_work, msecs_to_jiffies(3000));
 exit:
 	mptcp_debug("%s i am stumb %d", __func__, fmp->counter++);
 
