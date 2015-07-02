@@ -546,9 +546,11 @@ static void subflow_monitor_worker(struct work_struct *work) {
 	struct sock *meta_sk = mpcb->meta_sk;
 	if (sock_flag(meta_sk, SOCK_DEAD)) {
 		mptcp_debug("%s sock is dead buy", __func__);
-	} else {
-		queue_delayed_work(mptcp_wq, &fmp->subflow_monitor_work, msecs_to_jiffies(10000));
+		goto exit;
 	}
+
+	queue_delayed_work(mptcp_wq, &fmp->subflow_monitor_work, msecs_to_jiffies(10000));
+exit:
 	mptcp_debug("%s i am stumb %d", __func__, fmp->counter++);
 
 }
