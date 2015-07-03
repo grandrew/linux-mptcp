@@ -479,7 +479,7 @@ next_subflow:
 			mptcp_debug("%s remaining_bits is %s index is %d", __func__, full_mesh_get_16_bitfield(remaining_bits, bit_string), i);
 
 			rem->bitfield |= (1 << i);
-			mptcp_debug("%s and now rem->bitfield is %s index is %d", __func__, full_mesh_get_16_bitfield(rem->bitfield, bit_string), i);
+			mptcp_debug("%s and now rem->bitfield is %s index is %d rem_id %d loc_id %d", __func__, full_mesh_get_16_bitfield(rem->bitfield, bit_string), i, rem->rem4_id, mptcp_local->locaddr4[i].loc4_id);
 
 			rem4.addr = rem->addr;
 			rem4.port = rem->port;
