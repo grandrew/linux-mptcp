@@ -1277,7 +1277,7 @@ int mptcp_add_sock(struct sock *meta_sk, struct sock *sk, u8 loc_id, u8 rem_id,
 
 void mptcp_del_sock(struct sock *sk)
 {
-	struct tcp_sock *tp = tcp_sk(sk), *tp_prev;
+	struct tcp_sock *tp = tcp_sk(sk), *tp_prev, *meta_tp;
 	struct mptcp_cb *mpcb;
 
 	if (!tp->mptcp || !tp->mptcp->attached)
@@ -1315,6 +1315,17 @@ void mptcp_del_sock(struct sock *sk)
 		mpcb->master_sk = NULL;
 	else if (tp->mptcp->pre_established)
 		sk_stop_timer(sk, &tp->mptcp->mptcp_ack_timer);
+
+	meta_tp = tcp_sk(tp->meta_sk);
+	if (meta_tp->mpcb->service_worker.func) {
+		mptcp_debug("%s: meta service worker found\n", __func__);
+		if (!work_pending(&meta_tp->mpcb->service_worker)) {
+			//sock_hold(tp->meta_sk);
+			queue_work(mptcp_wq, &meta_tp->mpcb->service_worker);
+		}
+	} else {
+		mptcp_debug("%s: meta service worker is void\n", __func__);
+	}
 
 	rcu_assign_pointer(inet_sk(sk)->inet_opt, NULL);
 }

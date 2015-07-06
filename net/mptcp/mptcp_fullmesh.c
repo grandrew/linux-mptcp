@@ -442,8 +442,6 @@ static void create_subflow_worker(struct work_struct *work)
 	if (!mptcp_local)
 		return;
 
-	queue_delayed_work(mptcp_wq, &fmp->subflow_monitor_work,  msecs_to_jiffies(10000));
-
 next_subflow:
 	if (iter) {
 		release_sock(meta_sk);
@@ -533,10 +531,19 @@ next_subflow:
 	}
 
 exit:
+
+	if (!delayed_work_pending(&fmp->subflow_monitor_work)) {
+		queue_delayed_work(mptcp_wq, &fmp->subflow_monitor_work, msecs_to_jiffies(10000));
+	}
+
 	kfree(mptcp_local);
 	release_sock(meta_sk);
 	mutex_unlock(&mpcb->mpcb_mutex);
 	sock_put(meta_sk);
+}
+
+static void subflow_service_worker(struct work_struct *work) {
+	mptcp_debug("%s i am service worker stumb ", __func__);
 }
 
 static void subflow_monitor_worker(struct work_struct *work) {
@@ -1260,6 +1267,7 @@ static void full_mesh_new_session(const struct sock *meta_sk)
 	INIT_WORK(&fmp->subflow_work, create_subflow_worker);
 	INIT_DELAYED_WORK(&fmp->subflow_retry_work, retry_subflow_worker);
 	INIT_DELAYED_WORK(&fmp->subflow_monitor_work, subflow_monitor_worker);
+	INIT_WORK(&mpcb->service_worker, subflow_service_worker);
 	fmp->mpcb = mpcb;
 
 	if (!meta_v4 && meta_sk->sk_ipv6only)

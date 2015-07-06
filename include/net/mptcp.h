@@ -339,6 +339,10 @@ struct mptcp_cb {
 
 	/* Timer for retransmitting SYN/ACK+MP_JOIN */
 	struct timer_list synack_timer;
+
+	/* Service procedure for meta socket*/
+	struct work_struct service_worker;
+	struct delayed_work delayed_service_worker;
 };
 
 #define MPTCP_SUB_CAPABLE			0
